@@ -3,7 +3,7 @@
 
 # #           Project: Stock data analysis of Google
 
-# In[113]:
+# In[1]:
 
 
 #import library
@@ -17,11 +17,14 @@ import seaborn as sns
 from scipy.stats import kstest
 from scipy import stats
 from pandas import DataFrame,Series
+from statsmodels.graphics.tsaplots import plot_acf,plot_pacf #ACF and PACF test
+import statsmodels.api as sm  #conduct the ARIMA model
+from arch import arch_model  #conduct the ARCH model
 
 
 # ## 1.Data preparation
 
-# In[114]:
+# In[2]:
 
 
 #Get all the stock data of Google from 2004 to 2022
@@ -56,7 +59,7 @@ response1 = requests.request("GET", url, headers=headers, params=querystring)
 
 # ## 2.Data Cleaning
 
-# In[115]:
+# In[3]:
 
 
 #Transform Google's json file to a data frame
@@ -68,7 +71,7 @@ Goog = Goog.reset_index(drop = 'True')
 Goog.head()
 
 
-# In[116]:
+# In[4]:
 
 
 #Transform Dow Jones's json file to a data frame
@@ -80,7 +83,7 @@ MSFT = MSFT.reset_index(drop = 'True')
 MSFT.head()
 
 
-# In[117]:
+# In[5]:
 
 
 #Change the timestamp to a normal date of Google
@@ -90,7 +93,7 @@ Goog['date'] = pd.to_datetime(Goog['date'], format="%Y-%m-%d")
 Goog.head()
 
 
-# In[118]:
+# In[6]:
 
 
 #Change the timestamp to a normal date of MSFT
@@ -100,7 +103,7 @@ MSFT['date'] = pd.to_datetime(MSFT['date'], format="%Y-%m-%d")
 MSFT.head()
 
 
-# In[119]:
+# In[7]:
 
 
 #delete the useless column of Goog
@@ -119,7 +122,7 @@ Goog = Goog.drop_duplicates(subset = 'date')
 Goog
 
 
-# In[120]:
+# In[8]:
 
 
 #delete the useless column of MSFT
@@ -138,7 +141,7 @@ MSFT = MSFT.drop_duplicates(subset = 'date')
 MSFT
 
 
-# In[121]:
+# In[9]:
 
 
 #Modify the column name
@@ -160,7 +163,7 @@ Stock = Stock.dropna(axis=0)
 Stock
 
 
-# In[122]:
+# In[10]:
 
 
 #Saving files as  csv
@@ -169,7 +172,7 @@ Stock.to_csv('./Stock.csv')
 
 # ## Exploratory analysis
 
-# In[123]:
+# In[11]:
 
 
 Stock.describe()
@@ -177,7 +180,7 @@ Stock.describe()
 
 # #### According to the table above, Microsoft's historical average stock price is approximately twice that of Google, and Microsoft's all-time high stock price of 344.62 is more than twice as high as Google's 151.86. In addition, the historical daily trading volume of Microsoft stock is 272 billion, while Google is only 171.6 billion, but this does not mean that Microsoft's trading is more active than Google's, due to Google's higher trading volume than Microsoft. The above data does not indicate that company's stock is performing better, we need to calculate the rise and fall of the stock price to get the result.
 
-# In[124]:
+# In[12]:
 
 
 #calculate the RF_rate 
@@ -190,7 +193,7 @@ MSFT_RF_rate = (Stock['open_MSFT']-Stock['close_MSFT'])/Stock['open_MSFT']*100
 Stock.insert(15,'MSFT_RF_rate',MSFT_RF_rate)
 
 
-# In[125]:
+# In[13]:
 
 
 #Use the histogram to see the RF_rate distribution of GOOG
@@ -206,7 +209,7 @@ plt.title('Figure1: GOOG RF_rate distribution ')
 plt.show()
 
 
-# In[126]:
+# In[14]:
 
 
 #Use the histogram to see the RF_rate distribution of GOOG
@@ -224,7 +227,7 @@ plt.show()
 
 # #### According to Figures 1 and 2, Google's stock price single-day RF_rate distribution is right-skewed, while Microsoft's stock price single-day RF_rate distribution is left-skewed. This means that Microsoft stock price has more single-day up days than Google. However, Microsoft's outliers are more extreme than Google's, and Microsoft's maximum one-day declines are more extreme than Google's.
 
-# In[127]:
+# In[15]:
 
 
 #Plot a line graph of the stock prices of the two companies
@@ -239,7 +242,7 @@ plt.legend()
 
 # #### According to figure3, the stock prices of both companies have been rising since 2004 until the peak at the end of 2021, after which both companies' stock prices have been falling to the present.
 
-# In[128]:
+# In[16]:
 
 
 #Plot a scatter plot to see if Trading Volume and RF_rate are correlated
@@ -253,7 +256,7 @@ plt.title('Figure 4: Scatter plot of trading value and RF_rate')
 
 # #### According to figure 4, there is no significant correlation between RF_rate and Trading value, i.e. Trading value does not affect whether the stock is up or down on that day.
 
-# In[129]:
+# In[17]:
 
 
 #Analyze if there is a correlation between GOOG's stock price and MSFT's
@@ -266,7 +269,7 @@ plt.title('Figure 5: Scatterplot of Google RF_rate and Microsoft RF_rate')
 
 # #### According to figure 5, there is a strong linear correlation between Google's RF_rate and Microsoft's RF_rate, i.e., Google's stock price and Microsoft's price affect each other. We can further calculate the correlation coefficient between the two.
 
-# In[130]:
+# In[18]:
 
 
 #Calculate their correlation coefficients
@@ -282,7 +285,7 @@ print('Correlation coefficient is = %6.3f,p-value = %6.3f'%(r,p))
 
 # #### 3.1(1) Monthly Trading Strategy
 
-# In[140]:
+# In[19]:
 
 
 #Get month data
@@ -294,7 +297,7 @@ Stock_monthly = new_Stock.resample('M').first()
 Stock_monthly.head()
 
 
-# In[150]:
+# In[20]:
 
 
 #Calculate the cost of buying a stock
@@ -311,7 +314,7 @@ print('The income of GOOG is',income_GOOG.round())
 
 # #### 3.1(2) Double Averaging Strategy
 
-# In[142]:
+# In[21]:
 
 
 #MA5
@@ -321,7 +324,7 @@ ma5_GOOG = Stock['close_GOOG'].rolling(5).mean()
 ma30_GOOG = Stock['close_GOOG'].rolling(30).mean()
 
 
-# In[143]:
+# In[22]:
 
 
 #Get the death_date, i.e. when MA5 is trending down and crosses MA30(death cross),When the MA5 is trending upwards over the MA30(golden cross)
@@ -341,7 +344,7 @@ death_date = Stock1.loc[death_ex].index
 death_date
 
 
-# In[144]:
+# In[23]:
 
 
 #Determine the golden cross condition and obtain the date of the cross
@@ -350,7 +353,7 @@ golden_date = Stock1.loc[golden_ex].index
 golden_date
 
 
-# In[145]:
+# In[24]:
 
 
 #Merge the dates of golden crosses and dead crosses and mark them
@@ -362,7 +365,7 @@ s = s.sort_index()
 s #the dates of golden and dead crosses
 
 
-# In[148]:
+# In[25]:
 
 
 #Using the  Double Averaging Strategy
@@ -394,14 +397,86 @@ print('The income of GOOG by using this strategy is',(last_money-start_money).ro
 
 # #### Based on the results of the two strategies above, it comes out to be 821,204 USD for the same amount of money spent. The first strategy focuses on regular money management, which is less risky, but also has a smaller income of  774,382 USD. The second trading strategy earned  16,692,428 USD, which is much higher than the first strategy's income.
 
-# ### 3.3 Try 2 different models to predict the stock movements in the next 30 days and plot the predictions
+# ### 3.3 Try to predict the next 30-day GOOG stock price using the classical time series model ARIMA, what if it is using a GARCH model?
 
 # #### 3.3(1). ARIMA Model------ARIMA model is a classic analytical model of time series, divided into AR (Auto Regression) part, which is used to describe the relationship between the current value and the historical value, using the variable's own historical time data to predict itself, and MA (Moving Average) part, in the AR model, if the series is not a white noise, it is usually considered to be a moving average of order q
 
-# In[149]:
+# In[26]:
 
 
-cost_GOOG
+#Splitting data sets
+Stock_1 = Stock['close_GOOG'].resample('W-TUE').mean()#Weekly frequency as a standard
+Stock_train = Stock_1['2008':'2022']
+# Differentiate the data to make the data smooth and meet the requirement of smoothness
+stock_dif = Stock_train.diff(1).dropna()
+plt.figure()
+plt.plot(stock_dif)
+font_Loc=''
+plt.title('Figure 6: First order differential') 
+
+
+# #### The time series is essentially smooth after performing differencing. We can perform ACF and PACF tests to further determine whether the first-order difference satisfies the smoothness requirement.
+
+# In[27]:
+
+
+#Plot ACF 
+ACF = plot_acf(stock_dif, lags=20)
+plt.title('Figure 7: ACF plot')
+plt.show()
+
+#Plot PACF
+PACF = plot_pacf(stock_dif,lags = 20)
+plt.title('Figure 8:PACF')
+plt.show()
+
+
+# #### According to Figures 7 and 8, the results already fall within the confidence interval when performing the first-order difference (blue area in the figure), so it can be determined that performing the first-order difference is reliable and valid.Next, the ARIMA model can be performed
+
+# In[28]:
+
+
+#conduct the model
+model = sm.tsa.arima.ARIMA(Stock_train, order=(1,1,1))# Training model, order representation (p,d,q)
+result = model.fit()
+
+#make the predication
+pred = result.predict('2022-12-28','2023-01-27',dynamic=False,type='levels')
+
+
+# In[29]:
+
+
+#Plot's predicted results using the ARIMA model
+plt.figure(figsize=(8,8))
+plt.xticks(rotation = 45)
+plt.plot(pred)
+plt.plot(Stock_train['2022-10-20':'2022']) #Sliced data makes the presentation of prediction results more obvious
+plt.title('Figure 9:GOOG stock price results for the next 30 days using ARIMA')
+plt.show()
+
+
+# #### In the ARIMA model, we generally assume that the variance of the disturbance term is constant, however, in many cases, the variance of the disturbance term for time-series fluctuations is not constant, and the GARCH model is the variance model that portrays the variance over time.
+
+# In[66]:
+
+
+#Conduct the garch model
+garch_model = arch_model(Stock_train, p=1,q=1, 
+                        mean = 'constant', vol='GARCH', dist='normal')
+#run the model
+ga_result = garch_model.fit(disp='off')
+
+#make the predication
+pred1 = ga_result.forecast(horizon=30,start='2022-12-28')
+#Plot's predicted results using the GARCH model
+plt.plot(Stock_train['2022-10-20':'2022'])
+
+
+# In[44]:
+
+
+
 
 
 # In[ ]:
@@ -409,8 +484,6 @@ cost_GOOG
 
 
 
-
-# #### 3.4 GARCH Model------In the ARIMA model, we generally assume that the variance of the disturbance term is constant, however, in many cases, the variance of the disturbance term for time series fluctuations is not constant. The GARCH model solves the problem of assuming constant variance compared to the ARIMA model.
 
 # ### 3.3In response to the conclusion that there is a positive correlation between the stock prices of the two stocks above, we continue to extend the analysis and need to obtain more data on the stocks for correlation analysis
 
