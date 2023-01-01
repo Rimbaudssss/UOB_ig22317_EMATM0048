@@ -396,11 +396,7 @@ print('The income of GOOG by using this strategy is',(last_money-start_money).ro
 
 # ### 3.3 Try 2 different models to predict the stock movements in the next 30 days and plot the predictions
 
-# In[139]:
-
-
-Stock1
-
+# #### 3.3(1). ARIMA Model------ARIMA model is a classic analytical model of time series, divided into AR (Auto Regression) part, which is used to describe the relationship between the current value and the historical value, using the variable's own historical time data to predict itself, and MA (Moving Average) part, in the AR model, if the series is not a white noise, it is usually considered to be a moving average of order q
 
 # In[149]:
 
@@ -414,17 +410,9 @@ cost_GOOG
 
 
 
-# In[ ]:
+# #### 3.4 GARCH Model------In the ARIMA model, we generally assume that the variance of the disturbance term is constant, however, in many cases, the variance of the disturbance term for time series fluctuations is not constant. The GARCH model solves the problem of assuming constant variance compared to the ARIMA model.
 
-
-
-
-
-# In[ ]:
-
-
-
-
+# ### 3.3In response to the conclusion that there is a positive correlation between the stock prices of the two stocks above, we continue to extend the analysis and need to obtain more data on the stocks for correlation analysis
 
 # In[ ]:
 
