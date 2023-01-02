@@ -12,6 +12,7 @@ import numpy as np #library to analyse data
 import pandas as pd #library to deal with vectorized data
 import random #generate random numbers
 import time
+import math #calculation
 import matplotlib.pyplot as plt
 import seaborn as sns 
 from scipy.stats import kstest
@@ -19,7 +20,7 @@ from scipy import stats
 from pandas import DataFrame,Series
 from statsmodels.graphics.tsaplots import plot_acf,plot_pacf #ACF and PACF test
 import statsmodels.api as sm  #conduct the ARIMA model
-from arch import arch_model  #conduct the ARCH model
+from sklearn import linear_model  #conduct the liner model
 
 
 # ## 1.Data preparation
@@ -397,9 +398,9 @@ print('The income of GOOG by using this strategy is',(last_money-start_money).ro
 
 # #### Based on the results of the two strategies above, it comes out to be 821,204 USD for the same amount of money spent. The first strategy focuses on regular money management, which is less risky, but also has a smaller income of  774,382 USD. The second trading strategy earned  16,692,428 USD, which is much higher than the first strategy's income.
 
-# ### 3.3 Try to predict the next 30-day GOOG stock price using the classical time series model ARIMA, what if it is using a GARCH model?
+# ### 3.3 Try to predict the stock price in the next 30 days using time series models (ONLY for GOOG)
 
-# #### 3.3(1). ARIMA Model------ARIMA model is a classic analytical model of time series, divided into AR (Auto Regression) part, which is used to describe the relationship between the current value and the historical value, using the variable's own historical time data to predict itself, and MA (Moving Average) part, in the AR model, if the series is not a white noise, it is usually considered to be a moving average of order q
+# #### ARIMA Model------ARIMA model is a classic analytical model of time series, divided into AR (Auto Regression) part, which is used to describe the relationship between the current value and the historical value, using the variable's own historical time data to predict itself, and MA (Moving Average) part, in the AR model, if the series is not a white noise, it is usually considered to be a moving average of order q
 
 # In[26]:
 
@@ -433,7 +434,7 @@ plt.show()
 
 # #### According to Figures 7 and 8, the results already fall within the confidence interval when performing the first-order difference (blue area in the figure), so it can be determined that performing the first-order difference is reliable and valid.Next, the ARIMA model can be performed
 
-# In[28]:
+# In[29]:
 
 
 #conduct the model
@@ -444,7 +445,7 @@ result = model.fit()
 pred = result.predict('2022-12-28','2023-01-27',dynamic=False,type='levels')
 
 
-# In[29]:
+# In[30]:
 
 
 #Plot's predicted results using the ARIMA model
@@ -456,36 +457,29 @@ plt.title('Figure 9:GOOG stock price results for the next 30 days using ARIMA')
 plt.show()
 
 
-# #### In the ARIMA model, we generally assume that the variance of the disturbance term is constant, however, in many cases, the variance of the disturbance term for time-series fluctuations is not constant, and the GARCH model is the variance model that portrays the variance over time.
-
-# In[66]:
+# In[49]:
 
 
-#Conduct the garch model
-garch_model = arch_model(Stock_train, p=1,q=1, 
-                        mean = 'constant', vol='GARCH', dist='normal')
-#run the model
-ga_result = garch_model.fit(disp='off')
-
-#make the predication
-pred1 = ga_result.forecast(horizon=30,start='2022-12-28')
-#Plot's predicted results using the GARCH model
-plt.plot(Stock_train['2022-10-20':'2022'])
-
-
-# In[44]:
-
-
-
-
-
-# In[ ]:
-
-
-
+prediction
 
 
 # ### 3.3In response to the conclusion that there is a positive correlation between the stock prices of the two stocks above, we continue to extend the analysis and need to obtain more data on the stocks for correlation analysis
+
+# In[43]:
+
+
+from yahoo_fin.stock_info import get_data
+
+
+# In[71]:
+
+
+#Transform Google's json file to a data frame
+data2= response.json()["prices"]
+data3 = pd.json_normalize(data2)
+#reverse the original data, make the data begin from 2004
+data3
+
 
 # In[ ]:
 
