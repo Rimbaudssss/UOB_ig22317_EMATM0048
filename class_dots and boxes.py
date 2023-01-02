@@ -31,3 +31,96 @@ class Board(): #Create the class of Board
         if [px1,py1,px2,py2] in self.moves or [px2, py2, px1, py1] in self.moves:
             return  False
         return True
+
+    def addMove(self,px1,py1,px2,py2):  #class of adding movement
+        self.moves.append([px1,py1,px2,py2])
+
+    def change_Board(self,x,y,pos):  #Draw the edges and modify the attribution of the grid
+        self.board[x][y][pos] = 1
+
+    def check_Board(self):#Check if there are new scores, and if the name should be filled into the board
+        new_score = 0
+        for i in range(self.row -1):
+            for k in range(self.col -1):
+                flag = 0
+                for k in range(4):
+                    flag += self.board[i][j][k]
+                if flag == 4 and self.board[i][j][4] == '':
+                    self.board[i][j][4] = self.id
+                    new_score += 1
+
+        if new_score == 0:
+            self.switchPlayer() #class of changing the player
+        return new_score
+
+    def setPlayer(self,id1,id2,order):  #class of selecting the palyer and setting
+        self.id1 = id1
+        self.id2 = id2
+        if order == 0: #Randomly determine the order of players
+            self.id = self.id1
+            print('Player 1 moves firstly:')
+        else:
+            self.id =self.id2
+            print('Player 2 moves firstly:')
+
+    def switchPlayer(self):
+        if self.id ==self.id1: #Determine if the id is the same, otherwise it will automatically change to id1 player
+            self.id = self.id2
+        else:
+            self.id = self.id1
+
+    def print_Board(self):
+        for i in range(1,self.row +1):
+            if i < self.now:
+                for j in range(1,self.col +1): #Print the horizontal of the chessboard
+                    if j < self.col:
+                        if self.board[i - 1][j - 1][1] ==1:
+                            print(f"({i}, {j})--", end='')
+                        else:
+                            print(f"({i}, {j})  ", end='')
+                    else:
+                        print(f"({i}, {j})")
+
+                for j in range(1,self.col +1): #Print the vertical of the chessboard
+                    if j < self.col:
+                        if self.board[i - 1][j - 1][0] ==1:
+                            print("   | ", end='')
+                        else:
+                            print(f"    ", end='')
+
+                        if self.board[i - 1][j - 1][4] != "":
+                            print(f" {self.board[i - 1][j - 1][4]}", end='')
+                        else:
+                            print("   ", end='')
+
+                    else:
+                        if self.board[i - 1][j - 2][2] == 1:
+                            print("   | ")
+                        else:
+                            print("    ")
+            else:
+                for j in range(1, self.col + 1):  # 横
+                    if j < self.col:
+                        if self.board[i - 2][j - 1][3] == 1:
+                            print(f"({i}, {j})--", end='')
+                        else:
+                            print(f"({i}, {j})  ", end='')
+                    else:
+                        print(f"({i}, {j})")
+
+
+class Player(): #class of player
+    def __int__(self,id):
+        self.id = id
+        self.score = 0
+
+class ComputerPlayer(Player): #Create the computer player
+    def __init__(self, id):
+        super().__init__(id)
+
+    def generateMove(self, board): #The computer can automatically move
+        row = len(board)
+        col = len(board[0])
+        # print("row, col", row, col)
+
+
