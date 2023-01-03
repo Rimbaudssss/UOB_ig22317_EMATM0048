@@ -16,9 +16,9 @@ class Board(): #Create the class of Board
 
     def createBoard(self):
         board = []
-        for i in range(self,row - 1):#Iterate, create row
+        for i in range(self.row - 1):#Iterate, create row
             row_t = []
-            for j in range(self,col - 1): #Iterate, create column
+            for j in range(self.col - 1): #Iterate, create column
                 col_t = [0,0,0,0,'']   #Left, top, right, bottom
                 row_t.append(col_t) #concat the row_t and col_t
             board.append(row_t)
@@ -41,7 +41,7 @@ class Board(): #Create the class of Board
     def check_Board(self):#Check if there are new scores, and if the name should be filled into the board
         new_score = 0
         for i in range(self.row -1):
-            for k in range(self.col -1):
+            for j in range(self.col -1):
                 flag = 0
                 for k in range(4):
                     flag += self.board[i][j][k]
@@ -157,3 +157,38 @@ class ComputerPlayer(Player): #Create the computer player
             return i + 1, j + 2, i + 2, j + 2
         else:  # k==3
             return i + 2, j + 1, i + 2, j + 2
+
+class HumanPlayer(Player):
+    def __int__(self,id):
+        super().__init__(id) #Call the id of the parent class Player
+
+    def generateMove(self,board): #
+        move = input("Input move:(Please be like the form of (x1,y1)-(x2,y2)").split('-')
+        px1 = int(move[0][1])
+        py1 = int(move[0][3])
+        px2 = int(move[1][1])
+        py2 = int(move[1][3])
+        return px1,py1,px2,py2
+
+
+#Add intelligent computer players, equivalent to computer players with optimized algorithms
+class SmartComputerPlayer(Player):
+    def __int__(self,id):
+        super().__init__(id)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
