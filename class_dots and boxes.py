@@ -123,4 +123,37 @@ class ComputerPlayer(Player): #Create the computer player
         col = len(board[0])
         # print("row, col", row, col)
 
+        # Find the side where you can score one point at a time
+        for i in range(row):
+            for j in range(col):
+                sum_t = board[i][j][0] + board[i][j][1] + board[i][j][2] + board[i][j][3]
+                if sum_t == 3:
+                    if board[i][j][0] == 0:
+                        return i + 1, j + 1, i + 2, j + 1
+                    elif board[i][j][1] == 0:
+                        return i + 1, j + 1, i + 1, j + 2
+                    elif board[i][j][2] == 0:
+                        return i + 1, j + 2, i + 2, j + 2
+                    else:
+                        return i + 2, j + 1, i + 2, j + 2
 
+        # If there is no position where can score, just randomize a position.
+        i = random.randint(0, row - 1)
+        j = random.randint(0, col - 1)
+        k = random.randint(0, 3)
+        while board[i][j][4] != "":
+            i = random.randint(0, row - 1)
+            j = random.randint(0, col - 1)
+
+        while board[i][j][k] == 1:
+            k = random.randint(0, 3)
+
+        # print(i, j, k)
+        if k == 0:
+            return i + 1, j + 1, i + 2, j + 1
+        elif k == 1:
+            return i + 1, j + 1, i + 1, j + 2
+        elif k == 2:
+            return i + 1, j + 2, i + 2, j + 2
+        else:  # k==3
+            return i + 2, j + 1, i + 2, j + 2
