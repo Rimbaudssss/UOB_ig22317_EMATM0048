@@ -3,7 +3,7 @@
 
 # #           Project: Stock data analysis of Google
 
-# In[1]:
+# In[79]:
 
 
 #import library
@@ -20,7 +20,6 @@ from scipy import stats
 from pandas import DataFrame,Series
 from statsmodels.graphics.tsaplots import plot_acf,plot_pacf #ACF and PACF test
 import statsmodels.api as sm  #conduct the ARIMA model
-from sklearn import linear_model  #conduct the liner model
 
 
 # ## 1.Data preparation
@@ -445,7 +444,7 @@ result = model.fit()
 pred = result.predict('2022-12-28','2023-01-27',dynamic=False,type='levels')
 
 
-# In[30]:
+# In[77]:
 
 
 #Plot's predicted results using the ARIMA model
@@ -457,29 +456,120 @@ plt.title('Figure 9:GOOG stock price results for the next 30 days using ARIMA')
 plt.show()
 
 
-# In[49]:
+# #### According to Figure 9, we can see that the stock trend in the next 30 days tends to be flat and not too volatile. the ARIMA model will make forecasts based on historical stock fluctuations, but it cannot take into account unexpected events or other influencing factors (such as changes in the world economy), so this forecast is only of reference value.
+
+# ### 3.3 Select multiple stocks and set up a portfolio, then plot the yield curve
+
+# In[330]:
 
 
-prediction
+from yahoo_fin.stock_info import get_data #library that supports getting stocks data
+stock_list = ["amzn", "aapl", "goog", "msft","meta","tsla"]
+stock_datas = {}
+for ticker in stock_list:
+    stock_datas[ticker] = get_data(ticker,start_date="12/26/2008") #Iterate through the list of stocks to get multiple stock data
+    
+#Merge Stock Data
+stock_datas = pd.concat(stock_datas)
+stock_datas = stock_datas.reset_index().rename(columns={'level_1':'date'})
+#Set date as index
+stock_datas = stock_datas.set_index('date').rename(columns={'level_0':'company'})
+stock_datas.head()
 
 
-# ### 3.3In response to the conclusion that there is a positive correlation between the stock prices of the two stocks above, we continue to extend the analysis and need to obtain more data on the stocks for correlation analysis
-
-# In[43]:
+# In[331]:
 
 
-from yahoo_fin.stock_info import get_data
+#Fetch the needed columns
+StockReturn = stock_datas[['company','adjclose']]
+StockReturn['date'] = StockReturn.index
+StockReturn = StockReturn.reset_index(drop=True)
+#Convert data to rows and columns to make it easy to analyze
+StockReturn= pd.pivot_table(StockReturn,index ='date',values='adjclose',columns='company')
+# Calculate the daily rate of return
+StockReturn = StockReturn.pct_change()
+StockReturn.dropna().head()
 
 
-# In[71]:
+# #### A portfolio with a given weighting
+
+# In[332]:
 
 
-#Transform Google's json file to a data frame
-data2= response.json()["prices"]
-data3 = pd.json_normalize(data2)
-#reverse the original data, make the data begin from 2004
-data3
+# Copy the yield data into the new variable stock_return1, for the convenience of subsequent calls
+stock_return1 = StockReturn.copy()
 
+# Set combination weights, stored as numpy arrays, all add up to 1
+portfolio_1 = np.array([0.15,0.3,0.2,0.1,0.1,0.15])
+# Calculate weighted stock returns
+weight_return = stock_return1.mul(portfolio_1,axis = 1)
+# Calculate the return of the portfolio
+StockReturn['Portfolio_set'] = weight_return.sum(axis=1)
+
+# Plotting portfolio returns over time
+StockReturn.Portfolio_set.plot()
+plt.title('Figure 10:Daily yield curve for Portfolio 1')
+plt.show()
+
+
+# In[333]:
+
+
+#Define the cumulative returns function cumulative_returns and plot the cumulative returns curve
+def cummulation_return(stock_list):
+    for company in stock_list:
+        cummulation = ((1+StockReturn[company]).cumprod()-1)
+        cummulation.plot(label = company)
+    plt.legend()
+    plt.title('Figure 10:Cumulative return curve for Portfolio set')
+    plt.show()
+#Plotting cumulative return curves
+cummulation_return(['Portfolio_set'])
+
+
+# #### Equally Weighted Portfolio
+
+# In[334]:
+
+
+## Set the number of stocks in the portfolio
+number = 6
+# Distribute the weights of each item equally
+portfolio_2_weights = np.repeat(1/number,number)
+# Calculate the return of an equally weighted portfolio
+StockReturn['Portfolio_equal'] = stock_return1.mul(portfolio_2_weights,axis = 1).sum(axis = 1)
+#Plotting cumulative return curves
+cummulation_return(['Portfolio_equal','Portfolio_set'])
+
+
+# #### Market value-weighted portfolio
+
+# In[335]:
+
+
+#Take the data from the first day we started the portfolio
+Stock_market = stock_datas.loc['2012-05-21']
+#Calculate the market capitalization of all companies
+Stock_market['Market_value'] = Stock_market['adjclose']*Stock_market['volume']
+Stock_market = Stock_market['Market_value'].reset_index(drop =  True)
+Stock_market
+
+
+# In[336]:
+
+
+# Calculate market value weights
+Stock_market = np.array(Stock_market)
+marketvalue_weights = Stock_market/np.sum(Stock_market)
+# Calculate market capitalization-weighted portfolio returns
+StockReturn['Portfolio_MV'] = stock_return1.mul(marketvalue_weights,axis = 1).sum(axis =1)
+# Plotting cumulative return curves
+cummulation_return(['Portfolio_equal','Portfolio_set','Portfolio_MV'])
+
+
+# #### Based on the comparison of the different portfolios above, the portfolio with our own set ratios has the highest return, while the one with allocations based on market capitalization has the lowest return. This means that market capitalization plays a smaller role in the performance of stocks, so we must consider various factors when making our portfolios.
+
+# ### Summary
 
 # In[ ]:
 
