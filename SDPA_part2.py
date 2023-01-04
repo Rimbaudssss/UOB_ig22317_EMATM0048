@@ -571,6 +571,8 @@ cummulation_return(['Portfolio_equal','Portfolio_set','Portfolio_MV'])
 
 # ### Summary
 
+# #### In my undergraduate years, the programming language I used for data analysis has been R. This analysis is my first project using Python, and I have realized the strengths and weaknesses of both programming languages in data analysis, which I believe will help me a lot in my future work. model building. Secondly, I realized that the prerequisite for analyzing a data is to have sufficient understanding of the industry where the data is located, so this requires data analysts to have not only technical but also unique understanding of the business, otherwise their analysis will only be superficial and cannot be accurate. Third, the essence of data analysis is to accurately extract effective information from the cluttered data, I think in the future I should do enough research in advance when I conduct similar analysis projects, and the scale of the data should be large enough, because the stock market is a vast market, just a few stocks can not include enough information. Finally, this stock analysis project has implications for my future job as a financial analyst. I think that if I am to be qualified for this job, I need not only expertise in data analysis, but also need to start learning about finance.
+
 # In[ ]:
 
 
