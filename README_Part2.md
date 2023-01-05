@@ -17,3 +17,6 @@ import statsmodels.api as sm  #conduct the ARIMA model
 from yahoo_fin.stock_info import get_data #library that supports getting stocks data, using "pip install yahoo_fin" to install
 
 The above are all the packages to be used in Part2, some packages are installed using the pip install command
+
+Link of this project:
+https://github.com/Rimbaudssss/UOB_ig22317_EMATM0048.git
